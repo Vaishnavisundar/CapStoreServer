@@ -2,34 +2,49 @@ package com.capgemini.service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.capgemini.model.FeedBack;
+import com.capgemini.repository.FeedbackCommonRepository;
 
-import com.capgemini.model.Customer;
-import com.capgemini.repository.UserRepository;  
-@Service  
-public class FeedbackCommonImpl implements FeedbackCommon{
+@Service
+public class FeedbackCommonImpl implements FeedbackCommon {
+
+	@Autowired
+	FeedbackCommonRepository repo;
 
 	@Override
-	public void getComments(String message) {
-		// TODO Auto-generated method stub
-		
+	public FeedBack getComments(int id) {
+		return repo.getComments(id);
 	}
 
 	@Override
-	public void forwardToMerchant(String forwardMessage) {
-		// TODO Auto-generated method stub
-		
+	public List<FeedBack> displayAllFeedback() {
+		return repo.findAll();
 	}
 
 	@Override
-	public void responseFromMerchant(String responseMessage) {
-		// TODO Auto-generated method stub
+	public List<List<FeedBack>> postMerchantComments(int merchantId) {
 		
+		List<Integer> productIdList = new ArrayList<Integer>();
+		List<List<FeedBack>> feedbackIdList = new ArrayList<>();
+         
+		productIdList = repo.getProductIdFromMerchantId(merchantId);
+		
+		for (Integer id : productIdList) {
+			if (!repo.getFeedbackIdForThatProductId(id).isEmpty()) {
+				feedbackIdList.add(repo.getFeedbackIdForThatProductId(id));
+			}
+			}
+		
+		repo.postMerchantComments(merchantId);
+		return feedbackIdList;
 	}
 
-	
+	@Override
+	public FeedBack reponseToCustomer(FeedBack feedback) {
+		return repo.save(feedback);
+	}
 
-}  
+}
